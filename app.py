@@ -47,6 +47,16 @@ with st.sidebar:
     # Sample data option
     use_sample_data = st.checkbox("Use sample data", value=True)
     
+    # Add Audit Metrics button when a file is uploaded or sample data is selected
+    if uploaded_file is not None or use_sample_data:
+        if st.button("Audit Metrics", type="primary"):
+            # Remove homepage flag if it exists
+            if "show_homepage" in st.session_state:
+                del st.session_state["show_homepage"]
+            # Set flag to run analysis
+            st.session_state["run_audit"] = True
+            st.rerun()
+    
     # Reset app button (returns to homepage)
     if st.button("Reset Analysis", key="reset_btn"):
         # Set a flag in session state to show the homepage
@@ -104,21 +114,46 @@ if "show_homepage" in st.session_state and st.session_state["show_homepage"]:
 # Load and process data
 df = None
 
-# Load data from file or sample
-if uploaded_file is not None:
-    df = load_data(uploaded_file)
-elif use_sample_data:
-    # Use included sample data
-    try:
-        sample_file_path = "attached_assets/week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
-        if os.path.exists(sample_file_path):
-            df = load_data(sample_file_path)
-        else:
-            alternative_path = "week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
-            df = load_data(alternative_path)
-    except Exception as e:
-        st.error(f"Could not load sample data file: {e}")
-        st.error("Please upload your own CSV file.")
+# Check if we need to run the audit (button was pressed)
+run_analysis = False
+if "run_audit" in st.session_state and st.session_state["run_audit"]:
+    run_analysis = True
+    # Clear the flag so it doesn't auto-run next time
+    del st.session_state["run_audit"]
+
+# Load data from file or sample if running analysis
+if run_analysis:
+    if uploaded_file is not None:
+        df = load_data(uploaded_file)
+    elif use_sample_data:
+        # Use included sample data
+        try:
+            sample_file_path = "attached_assets/week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
+            if os.path.exists(sample_file_path):
+                df = load_data(sample_file_path)
+            else:
+                alternative_path = "week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
+                df = load_data(alternative_path)
+        except Exception as e:
+            st.error(f"Could not load sample data file: {e}")
+            st.error("Please upload your own CSV file.")
+else:
+    # If not running analysis, show a message to prompt user to run audit
+    if not ("show_homepage" in st.session_state and st.session_state["show_homepage"]):
+        st.info("👈 Use the sidebar to upload a CSV file or use sample data, then click 'Audit Metrics' to analyze your data")
+        # Preview of data capabilities with some sample screenshots
+        st.markdown("""
+        ## What You'll Get
+        
+        After clicking the 'Audit Metrics' button, you'll get a complete analysis of your metrics, including:
+        
+        * Identification of potential vanity metrics
+        * Analysis of your most valuable KPIs
+        * Department-specific recommendations
+        * Dashboard cleanup recommendations
+        
+        This tool helps focus your organization on metrics that actually drive business outcomes.
+        """)
 
 if df is not None:
     # Display dataset overview
