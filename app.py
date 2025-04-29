@@ -47,14 +47,60 @@ with st.sidebar:
     # Sample data option
     use_sample_data = st.checkbox("Use sample data", value=True)
     
-    # Reset app button
+    # Reset app button (returns to homepage)
     if st.button("Reset Analysis", key="reset_btn"):
-        # Clear session state for a proper reset
+        # Set a flag in session state to show the homepage
+        st.session_state["show_homepage"] = True
+        # Clear any other session state data
         for key in list(st.session_state.keys()):
-            del st.session_state[key]
+            if key != "show_homepage":
+                del st.session_state[key]
         st.rerun()  # Using st.rerun() to restart the app
 
 # Main content
+# Check if we should show the homepage
+if "show_homepage" in st.session_state and st.session_state["show_homepage"]:
+    # Display homepage content
+    st.header("Welcome to the KPI Audit Tool")
+    
+    st.markdown("""
+    ### What This Tool Does
+    
+    This AI-powered KPI Audit Tool helps you identify which metrics in your organization are actually driving business outcomes and which ones might be "vanity metrics" - numbers that look good but don't impact decisions.
+    
+    ### Getting Started
+    
+    1. Use the sidebar on the left to upload your KPI data in CSV format
+    2. Or simply use our sample data to see how the tool works
+    3. Explore the different tabs to see the analysis:
+        - **Metrics Overview**: See high-level distribution of metrics
+        - **Vanity Metrics Analysis**: Identify metrics that may not be driving value
+        - **Valuable Metrics**: Find your most impactful KPIs
+        - **Recommendations**: Get specific advice for each department
+    
+    ### About Vanity Metrics
+    
+    Vanity metrics are measurements that look impressive but don't actually help you make better decisions. Examples include:
+    - Social media follower counts that don't convert to sales
+    - Page views without engagement
+    - Downloads without active usage
+    - Metrics that are visible in dashboards but never used for decisions
+    
+    ### Why This Matters
+    
+    Organizations often track dozens of metrics, but research shows only 5-7 KPIs typically drive 80% of business outcomes. This tool helps you focus on what matters.
+    """)
+    
+    # Add a button to start analysis
+    if st.button("Start Analysis", type="primary"):
+        # Remove the homepage flag to show analysis
+        if "show_homepage" in st.session_state:
+            del st.session_state["show_homepage"]
+        st.rerun()
+    
+    # Exit early - don't show the analysis
+    st.stop()
+    
 # Load and process data
 df = None
 
