@@ -38,7 +38,7 @@ This tool helps organizations focus on metrics that actually drive outcomes rath
 - Matplotlib
 - Seaborn
 
-### Running the Application
+### Running the Application Locally
 
 1. Clone this repository
 2. Install dependencies:
@@ -49,6 +49,15 @@ This tool helps organizations focus on metrics that actually drive outcomes rath
    ```
    streamlit run app.py
    ```
+
+### Deploying to Streamlit Cloud
+
+1. Create an account on [Streamlit Cloud](https://streamlit.io/cloud)
+2. Connect your GitHub repository
+3. Deploy by pointing to the `app.py` file
+4. Set any required secrets in the Streamlit Cloud dashboard
+
+No additional configuration is needed as the `.streamlit/config.toml` file contains all necessary settings for deployment.
 
 ### CSV Data Format
 

@@ -123,20 +123,28 @@ if "run_audit" in st.session_state and st.session_state["run_audit"]:
 
 # Load data from file or sample if running analysis
 if run_analysis:
-    if uploaded_file is not None:
-        df = load_data(uploaded_file)
-    elif use_sample_data:
-        # Use included sample data
-        try:
-            sample_file_path = "attached_assets/week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
-            if os.path.exists(sample_file_path):
-                df = load_data(sample_file_path)
-            else:
-                alternative_path = "week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
-                df = load_data(alternative_path)
-        except Exception as e:
-            st.error(f"Could not load sample data file: {e}")
-            st.error("Please upload your own CSV file.")
+    try:
+        if uploaded_file is not None:
+            try:
+                df = load_data(uploaded_file)
+            except Exception as e:
+                st.error(f"Error loading uploaded file: {e}")
+                st.error("Please check that your CSV file has the required format and columns.")
+        elif use_sample_data:
+            # Use included sample data
+            try:
+                sample_file_path = "attached_assets/week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
+                if os.path.exists(sample_file_path):
+                    df = load_data(sample_file_path)
+                else:
+                    alternative_path = "week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
+                    df = load_data(alternative_path)
+            except Exception as e:
+                st.error(f"Could not load sample data file: {e}")
+                st.error("Please upload your own CSV file.")
+    except Exception as e:
+        st.error(f"An unexpected error occurred while loading data: {e}")
+        st.info("Try uploading a different file or using the sample data.")
 else:
     # If not running analysis, show a message to prompt user to run audit
     if not ("show_homepage" in st.session_state and st.session_state["show_homepage"]):
@@ -182,14 +190,19 @@ if df is not None:
     
     # Process metrics
     with st.spinner("Analyzing metrics..."):
-        # Apply the analysis algorithms
-        vanity_df = identify_vanity_metrics(df)
-        analyzed_df = identify_valuable_metrics(vanity_df)
-        
-        # Get additional derived data
-        top_metrics = get_top_metrics_by_department(analyzed_df, n=3)
-        metrics_to_remove = get_metrics_to_remove(analyzed_df)
-        impact_scores = calculate_metric_impact_score(analyzed_df)
+        try:
+            # Apply the analysis algorithms
+            vanity_df = identify_vanity_metrics(df)
+            analyzed_df = identify_valuable_metrics(vanity_df)
+            
+            # Get additional derived data
+            top_metrics = get_top_metrics_by_department(analyzed_df, n=3)
+            metrics_to_remove = get_metrics_to_remove(analyzed_df)
+            impact_scores = calculate_metric_impact_score(analyzed_df)
+        except Exception as e:
+            st.error(f"Error during metrics analysis: {e}")
+            st.error("There may be an issue with the format of your data. Please ensure it contains all required columns with the correct data types.")
+            st.stop()  # Stop execution if analysis fails
     
     # Dashboard tabs
     tab1, tab2, tab3, tab4 = st.tabs([
