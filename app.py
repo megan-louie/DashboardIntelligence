@@ -13,7 +13,6 @@ from utils import (
     calculate_metric_impact_score,
     get_metrics_to_remove
 )
-from db_utils import save_df_to_db, load_from_db
 
 # Set page configuration
 st.set_page_config(
@@ -48,48 +47,32 @@ with st.sidebar:
     # Sample data option
     use_sample_data = st.checkbox("Use sample data", value=True)
     
-    st.header("Data Storage")
-    data_source = st.radio(
-        "Data Source",
-        ["File Upload/Sample", "Database"],
-        index=0
-    )
-    
     # Reset app button
     if st.button("Reset Analysis", key="reset_btn"):
         # Clear session state for a proper reset
         for key in list(st.session_state.keys()):
             del st.session_state[key]
-        st.experimental_rerun()  # Using experimental_rerun() as an alternative
+        st.rerun()  # Using st.rerun() to restart the app
 
 # Main content
 # Load and process data
 df = None
 
-# Check if we should load from database
-if data_source == "Database":
-    with st.spinner("Loading data from database..."):
-        df = load_from_db()
-    if df is not None:
-        st.sidebar.success("✅ Data loaded from database")
-    else:
-        st.sidebar.warning("No data found in database")
-else:
-    # Load from file
-    if uploaded_file is not None:
-        df = load_data(uploaded_file)
-    elif use_sample_data:
-        # Use included sample data
-        try:
-            sample_file_path = "attached_assets/week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
-            if os.path.exists(sample_file_path):
-                df = load_data(sample_file_path)
-            else:
-                alternative_path = "week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
-                df = load_data(alternative_path)
-        except Exception as e:
-            st.error(f"Could not load sample data file: {e}")
-            st.error("Please upload your own CSV file.")
+# Load data from file or sample
+if uploaded_file is not None:
+    df = load_data(uploaded_file)
+elif use_sample_data:
+    # Use included sample data
+    try:
+        sample_file_path = "attached_assets/week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
+        if os.path.exists(sample_file_path):
+            df = load_data(sample_file_path)
+        else:
+            alternative_path = "week 2 - Problem_4_-_Vanity_Metrics_Dashboard__Revised_.csv"
+            df = load_data(alternative_path)
+    except Exception as e:
+        st.error(f"Could not load sample data file: {e}")
+        st.error("Please upload your own CSV file.")
 
 if df is not None:
     # Display dataset overview
@@ -126,19 +109,6 @@ if df is not None:
         top_metrics = get_top_metrics_by_department(analyzed_df, n=3)
         metrics_to_remove = get_metrics_to_remove(analyzed_df)
         impact_scores = calculate_metric_impact_score(analyzed_df)
-        
-        # Save to database option
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            st.info("You can save the current analysis to the database for future reference.")
-        with col2:
-            if st.button("Save to Database"):
-                with st.spinner("Saving to database..."):
-                    success = save_df_to_db(analyzed_df)
-                    if success:
-                        st.success("✅ Data saved to database successfully!")
-                    else:
-                        st.error("❌ Failed to save data to database.")
     
     # Dashboard tabs
     tab1, tab2, tab3, tab4 = st.tabs([
