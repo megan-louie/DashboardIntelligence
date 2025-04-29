@@ -1,4 +1,4 @@
-# AI-Powered KPI Audit Tool
+# AI-Powered KPI Audit Tool: https://dashboardintelligence.streamlit.app/
 
 A Streamlit application that analyzes organizational metrics to identify redundant, misleading, or zero-impact metrics ("vanity metrics") while recommending the most valuable metrics for business outcomes.
 
