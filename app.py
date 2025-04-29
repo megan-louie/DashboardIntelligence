@@ -188,6 +188,13 @@ if df is not None:
     with st.expander("Preview Raw Data"):
         st.dataframe(df)
     
+    # Initialize variables to avoid "possibly unbound" errors
+    analyzed_df = None
+    vanity_df = None
+    top_metrics = {}
+    metrics_to_remove = pd.DataFrame()
+    impact_scores = pd.DataFrame()
+    
     # Process metrics
     with st.spinner("Analyzing metrics..."):
         try:
@@ -280,6 +287,11 @@ if df is not None:
     with tab2:
         st.header("Vanity Metrics Analysis")
         
+        # Check if we have analysis data before proceeding
+        if analyzed_df is None or 'is_vanity' not in analyzed_df.columns:
+            st.error("Analysis data is missing or incomplete. Please try refreshing the page or uploading your data again.")
+            st.stop()
+            
         # Vanity metrics summary
         vanity_count = sum(analyzed_df['is_vanity'])
         st.subheader(f"Found {vanity_count} potential vanity metrics ({vanity_count/len(df):.1%} of total)")
